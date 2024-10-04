@@ -26,5 +26,8 @@ public class Config {
     }
     public static void reload() {
         fileConfiguration = YamlConfiguration.loadConfiguration(file);
+        PlayerManager.init();
+        EntityManger.init();
+        GuiMenus.init();
     }
 }

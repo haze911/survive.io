@@ -4,10 +4,7 @@ import me.neznamy.tab.api.TabAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Damageable;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -17,10 +14,12 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class PlayerListeners implements Listener {
     TabAPI api = TabAPI.getInstance();
-    private final int radiusGreenZone = Config.get().getInt("map.greenZone.radius");
-    Location center = new Location(Bukkit.getServer().getWorld("world"), 0, 0, 0);
+    Location greenZone = new Location(Bukkit.getWorld("world"), Config.get().getDouble("map.greenZone.ox"), Config.get().getDouble("map.greenZone.oy"), Config.get().getDouble("map.greenZone.oz"));
     private final int foodAmountCactus = Config.get().getInt("resources.foodAmountCactus");
     private final int foodAmount = Config.get().getInt("resources.foodAmount");
     private final int woodAmount = Config.get().getInt("resources.woodAmount");
@@ -30,6 +29,16 @@ public class PlayerListeners implements Listener {
     private final int expAmountStone = Config.get().getInt("resources.expAmountStone");
     private final int expAmountGold = Config.get().getInt("resources.expAmountGold");
     private final int expAmountFood = Config.get().getInt("resources.expAmountFood");
+    private final int shieldCooldown = Config.get().getInt("items.shield.cooldown");
+    private static List<Material> noDamageItems = Arrays.asList(
+            Material.WOODEN_AXE,
+            Material.IRON_AXE,
+            Material.STONE_AXE,
+            Material.DIAMOND_AXE,
+            Material.WOODEN_PICKAXE,
+            Material.IRON_PICKAXE,
+            Material.STONE_PICKAXE,
+            Material.DIAMOND_PICKAXE);
     //ДАВАНИЕ РЕСУРСОВ ЗА СЛОМАННЫЕ БЛОКИ
     @EventHandler
     public void breakBlockEvent(BlockBreakEvent event) {
@@ -69,7 +78,6 @@ public class PlayerListeners implements Listener {
             model.addGold(goldAmount);
             model.addExp(expAmountGold);
         }
-
     }
     //ЗАПРЕТ НА СТРОИТЕЛЬСТВО БЛОКОВ
     @EventHandler
@@ -105,42 +113,26 @@ public class PlayerListeners implements Listener {
     //ГРИНЗОНА + ЗАПРЕТ НА ПВП С ИНСТРУМЕНТАМИ
     @EventHandler
     public void playerDamagePlayer(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof Player && event.getEntity() instanceof Player)) return;
-        Player damager = (Player) event.getDamager();
-        Player player = (Player) event.getEntity();
-        switch (damager.getInventory().getItemInMainHand().getType()) {
-            case WOODEN_AXE:
-                event.setCancelled(true);
-            case STONE_AXE:
-                event.setCancelled(true);
-            case IRON_AXE:
-                event.setCancelled(true);
-            case DIAMOND_AXE:
-                event.setCancelled(true);
-            case NETHERITE_AXE:
-                event.setCancelled(true);
-            case WOODEN_PICKAXE:
-                event.setCancelled(true);
-            case STONE_PICKAXE:
-                event.setCancelled(true);
-            case IRON_PICKAXE:
-                event.setCancelled(true);
-            case DIAMOND_PICKAXE:
-                event.setCancelled(true);
-            case NETHERITE_PICKAXE:
-                event.setCancelled(true);
-
+        if (event.getEntity() instanceof Player) {
+            Player player = (Player) event.getEntity();
+            if (player.isBlocking()) player.setCooldown(Material.SHIELD, shieldCooldown);
         }
-        if (center.getNearbyPlayers(radiusGreenZone).contains(player)) {
-            event.getDamager().sendMessage("Пвп выключено в гринзоне");
-            event.setCancelled(true);
+        if (event.getDamager() instanceof Player) {
+            Player player = (Player) event.getDamager();
+            if (PlayerManager.getPlayerModel(player).inGreenZone()) {
+                event.getDamager().sendMessage("Пвп выключено в гринзоне");
+                event.setCancelled(true);
+            }
+            if (noDamageItems.contains(((Player) event.getDamager()).getInventory().getItemInMainHand().getType())) {
+                event.setCancelled(true);
+            }
         }
     }
     //СЕТ ДАМАГЕРА ДЛЯ ИГРОКА, ПОЛУЧИШВЕГО УРОН ОТ ПУЛИ
     @EventHandler
     public void entityGetDamageByProjectile(ProjectileHitEvent event) {
         Entity entity = event.getHitEntity();
-        if (center.getNearbyPlayers(radiusGreenZone).contains(entity)) {
+        if (entity instanceof Player && PlayerManager.getPlayerModel((Player) entity).inGreenZone()) {
             event.setCancelled(true);
             return;
         }

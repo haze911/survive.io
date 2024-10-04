@@ -51,7 +51,7 @@ public class EntityListeners implements Listener {
                 PlayerManager.getPlayerModel(player).addExp(expAmountWolf);
                 PlayerManager.getPlayerModel(player).addGold(goldAmountWolf);
                 PlayerManager.getPlayerModel(player).addFood(foodAmountWolf);
-                entity.getPassenger().remove();
+                entity.getPassengers().get(0).remove();
                 break;
             case RAVAGER:
                 EntityManger.bossSpawnTimer();

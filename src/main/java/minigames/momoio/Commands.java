@@ -15,18 +15,14 @@ public class Commands implements CommandExecutor {
         Player player = (Player) commandSender;
         if (command.getName().equals("momoio")) {
             if (args[0].equals("join")) {
-                PlayerManager.addPlayer(player);
+                PlayerManager.joinPlayer(player);
+            }
+            if(args[0].equals("spawn")) {
+                PlayerManager.teleportToGreenZone(player);
+            }
+            if(args[0].equals("quit")) {
                 PlayerManager.randomPlayerTeleport(player);
-                ItemStack pickaxe = new ItemStack(Material.WOODEN_PICKAXE);
-                ItemStack axe = new ItemStack(Material.WOODEN_AXE);
-                ItemMeta pickaxeMeta = pickaxe.getItemMeta();
-                pickaxeMeta.setUnbreakable(true);
-                pickaxe.setItemMeta(pickaxeMeta);
-                ItemMeta axeMeta = axe.getItemMeta();
-                axeMeta.setUnbreakable(true);
-                axe.setItemMeta(axeMeta);
-                player.getInventory().setItem(0, pickaxe);
-                player.getInventory().setItem(1, axe);
+                PlayerManager.getPlayerModel(player).setGreenZone(false);
             }
         }
         if (command.getName().equals("shop")) {

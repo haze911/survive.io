@@ -19,6 +19,7 @@ public class PlayerModel {
     private int lvl;
     private int totalExp;
     private int upgradePoints;
+    private boolean greenZone;
     private final int lvlProgress = Config.get().getInt("lvlProgress");
 
     public PlayerModel(Player player) {
@@ -31,6 +32,7 @@ public class PlayerModel {
         this.lvl = 0;
         this.totalExp = 0;
         this.upgradePoints = 0;
+        this.greenZone = false;
 
     }
     //ОБНОВЛЕНИЕ СКОРБОРДА У ИГРОКА
@@ -104,6 +106,12 @@ public class PlayerModel {
             player.setLevel(lvl);
             player.playSound(player, Sound.BLOCK_NOTE_BLOCK_PLING, SoundCategory.AMBIENT, 50, 2);
         }
+    }
+    public void setGreenZone(boolean b) {
+        greenZone = b;
+    }
+    public boolean inGreenZone() {
+        return greenZone;
     }
 }
 

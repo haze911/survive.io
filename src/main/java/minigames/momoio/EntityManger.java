@@ -2,7 +2,11 @@ package minigames.momoio;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.*;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -10,6 +14,8 @@ import java.util.List;
 import java.util.Random;
 
 public class EntityManger {
+    private static final int bossDamage = Config.get().getInt("entities.boss.bossDamage");
+    private static final int wolfDamage = Config.get().getInt("entities.wolfDamage");
     private static final int ox = Config.get().getInt("map.ox");
     private static final int oz = Config.get().getInt("map.oz");
     private static final int oy = Config.get().getInt("map.oy");
@@ -22,20 +28,25 @@ public class EntityManger {
     public static List<Entity> getEntityList() {return entityList;}
     //СПАВН СУЩНОСТЕЙ
     public static void init() {
+        for (Entity entity : getEntityList()) {
+            entity.remove();
+        }
         spawnBoss();
         BukkitRunnable entitySpawner = new BukkitRunnable() {
             @Override
             public void run() {
                 if (entityList.size() > maxEntity) return;
-                int x = new Random().nextInt(ox);
-                int z = new Random().nextInt(oz);
                 int chanceEntity = new Random().nextInt(4);
+                Location randomLocation;
                 while (true) {
-                    Location randomLocation = new Location(Bukkit.getServer().getWorld("world"), x, oy, z);
-                    if (!randomLocation.getBlock().getType().isAir()) continue;
+                    int x = new Random().nextInt(ox);
+                    int z = new Random().nextInt(oz);
+                    randomLocation = new Location(Bukkit.getServer().getWorld("world"), x, oy, z);
+                    if (!randomLocation.getBlock().getType().isAir()) {
+                        continue;
+                    }
                     break;
                 }
-                Location randomLocation = new Location(Bukkit.getServer().getWorld("world"), x, oy, z);
                 switch (chanceEntity) {
                     case 0:
                         Entity cow = randomLocation.getWorld().spawnEntity(randomLocation, EntityType.COW);
@@ -50,8 +61,11 @@ public class EntityManger {
                         entityList.add(chicken);
                     case 3:
                         Entity wolf = randomLocation.getWorld().spawnEntity(randomLocation, EntityType.WOLF);
-                        Entity zombie = randomLocation.getWorld().spawnEntity(randomLocation, EntityType.ZOMBIE);
+                        Silverfish zombie = (Silverfish) randomLocation.getWorld().spawnEntity(randomLocation, EntityType.SILVERFISH);
                         zombie.setInvulnerable(true);
+                        zombie.setInvisible(true);
+                        zombie.setSilent(true);
+                        zombie.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 9999999, wolfDamage));
                         wolf.addPassenger(zombie);
                         entityList.add(wolf);
                 }
@@ -73,11 +87,10 @@ public class EntityManger {
     }
     //МЕТОД СПАВНА БОССА
     private static void spawnBoss(){
-        System.getLogger("rer");
-        System.out.println("3rer");
-        Entity boss = bossSpawnCoords.getWorld().spawnEntity(bossSpawnCoords, EntityType.RAVAGER);
+        LivingEntity boss = (LivingEntity) bossSpawnCoords.getWorld().spawnEntity(bossSpawnCoords, EntityType.RAVAGER);
         boss.setCustomName("БРР ЧЕ ГОВОРИЩЬ БРРРЖ НЕ СЛЫШУ");
         boss.setCustomNameVisible(true);
+        boss.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 9999999, bossDamage));
         ((Damageable) boss).setHealth(bossHealth);
     }
 }

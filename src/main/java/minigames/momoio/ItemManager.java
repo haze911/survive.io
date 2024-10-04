@@ -24,7 +24,7 @@ public class ItemManager {
     private final static int dashCooldown = Config.get().getInt("items.dash.cooldown");
     private final static int enderEyeCooldown = Config.get().getInt("items.enderEye.cooldown");
     private final static double multiplyVectorForDash = Config.get().getDouble("items.dash.multiplyVector");
-    private final static int shootCost = Config.get().getInt("items.mushket.cost");
+    private final static int shootCost = Config.get().getInt("items.mushket.shootCost");
     private final static double radiusStan = Config.get().getDouble("items.stan.radius");
     private final static int stanLevel = Config.get().getInt("items.stan.levelEffect");
     private final static int stanDuration = Config.get().getInt("items.stan.duration");
