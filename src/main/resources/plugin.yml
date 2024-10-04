@@ -1,0 +1,13 @@
+name: MoMoio
+version: '${project.version}'
+main: minigames.momoio.MoMoio
+api-version: '1.18'
+depend:
+  - TAB
+commands:
+  shop:
+    description: err
+  momoio:
+    description: e312
+  amomoio:
+    description: 123
